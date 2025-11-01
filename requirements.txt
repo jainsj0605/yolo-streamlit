@@ -1,7 +1,7 @@
 streamlit
 ultralytics
 torch
-Pillow
 opencv-python-headless
-numpy<2.0.0
-protobuf<5.0.0
+Pillow
+streamlit-webrtc==0.57.0
+av==10.0.0
