@@ -35,7 +35,7 @@ if uploaded_file is not None:
 
     boxes = result.boxes.xyxy.cpu().numpy()          # bounding box coordinates
     classes = result.boxes.cls.cpu().numpy().astype(int)  # class IDs
-    confs = result.boxes.conf.cpu().numpy()          # confidence scores
+    confs = result.boxes.conf.cpu().numpy()          # confidence scores (0–1)
     names = result.names                             # class name dictionary
 
     # Copy image to draw on
@@ -45,7 +45,9 @@ if uploaded_file is not None:
         x1, y1, x2, y2 = map(int, box)
         color = (0, 255, 0)  # Green for all boxes
         label = names.get(cls, str(cls))
-        conf_text = f"{label} {conf*100:.1f}%"  # e.g. "plastic 87.3%"
+        
+        # ✅ Confidence value between 0 and 1 (e.g., 0.87)
+        conf_text = f"{label} {conf:.2f}"
 
         # Draw rectangle
         cv2.rectangle(drawn, (x1, y1), (x2, y2), color, 2)
@@ -67,4 +69,4 @@ if uploaded_file is not None:
         )
 
     # ✅ Display detection result (true colors + confidence)
-    st.image(drawn, caption="Detection Result (with Confidence Scores)", use_container_width=True)
+    st.image(drawn, caption="Detection Result (with Confidence Scores 0–1)", use_container_width=True)
