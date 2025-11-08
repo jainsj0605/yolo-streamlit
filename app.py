@@ -12,7 +12,7 @@ st.write("Upload an image to detect waste categories using your trained model.")
 # ----------------------------------------------------------
 @st.cache_resource
 def load_model():
-    return YOLO("best.pt")  # make sure path is correct
+    return YOLO("best.pt")  # ensure correct path
 
 model = load_model()
 
@@ -33,34 +33,38 @@ if uploaded_file is not None:
     results = model.predict(img_array, conf=0.5)
     result = results[0]
 
-    boxes = result.boxes.xyxy.cpu().numpy()   # bounding box coordinates
+    boxes = result.boxes.xyxy.cpu().numpy()          # bounding box coordinates
     classes = result.boxes.cls.cpu().numpy().astype(int)  # class IDs
-    confs = result.boxes.conf.cpu().numpy()   # confidence scores
-    names = result.names                     # class name dictionary
+    confs = result.boxes.conf.cpu().numpy()          # confidence scores
+    names = result.names                             # class name dictionary
 
     # Copy image to draw on
     drawn = img_array.copy()
 
     for box, cls, conf in zip(boxes, classes, confs):
         x1, y1, x2, y2 = map(int, box)
-        color = (0, 255, 0)  # green bounding box color
-        label = names[cls] if cls in names else str(cls)
+        color = (0, 255, 0)  # Green for all boxes
+        label = names.get(cls, str(cls))
         conf_text = f"{label} {conf*100:.1f}%"  # e.g. "plastic 87.3%"
 
         # Draw rectangle
         cv2.rectangle(drawn, (x1, y1), (x2, y2), color, 2)
 
-        # Background for text for better visibility
+        # Background rectangle for text
         (text_w, text_h), baseline = cv2.getTextSize(conf_text, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
         cv2.rectangle(drawn, (x1, y1 - text_h - 10), (x1 + text_w, y1), color, -1)
 
-        # Draw text
+        # Put text (black text on green background)
         cv2.putText(
             drawn,
             conf_text,
             (x1, y1 - 5),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.6,
-            (0, 0, 0),  # black text
+            (0, 0, 0),  # Black text
             2,
-            lineType=cv2.LINE
+            lineType=cv2.LINE_AA
+        )
+
+    # ✅ Display detection result (true colors + confidence)
+    st.image(drawn, caption="Detection Result (with Confidence Scores)", use_container_width=True)
